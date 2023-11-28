@@ -1,10 +1,11 @@
 import logging.handlers
 import argparse
-from sklearn.metrics import f1_score, accuracy_score
+import matplotlib.pyplot as plt
+from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 import pandas as pd
 import sys
 sys.path.append('.')
-from format_checker import check_format
+from official_baseline.subtaskA.format_checker.format_checker import check_format
 
 """
 Scoring of SEMEVAL-Task-8--subtask-A-and-B  with the metrics f1-macro, f1-micro and accuracy.
@@ -34,8 +35,9 @@ def evaluate(pred_fpath, gold_fpath):
   macro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="macro", zero_division=1)
   micro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="micro", zero_division=1)
   accuracy = accuracy_score(merged_df['label_gold'], merged_df['label_pred'])
+  conf_matrix = confusion_matrix(merged_df['label_gold'], merged_df['label_pred'])
 
-  return macro_f1, micro_f1, accuracy
+  return macro_f1, micro_f1, accuracy, conf_matrix
 
 
 def validate_files(pred_files):
@@ -56,7 +58,7 @@ if __name__ == '__main__':
 
   if validate_files(pred_file_path):
     logging.info('Prediction file format is correct')
-    macro_f1, micro_f1, accuracy = evaluate(pred_file_path, gold_file_path)
+    macro_f1, micro_f1, accuracy, conf_matrix = evaluate(pred_file_path, gold_file_path)
     logging.info("macro-F1={:.5f}\tmicro-F1={:.5f}\taccuracy={:.5f}".format(macro_f1, micro_f1, accuracy))
-
-
+    ConfusionMatrixDisplay(conf_matrix).plot()
+    plt.show()

@@ -5,3 +5,4 @@ group_baseline.pdf
 results.md
 system_proposal.pdf
 .DS_Store
+__pycache__/
