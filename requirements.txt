@@ -1,0 +1,7 @@
+datasets
+pandas
+evaluate
+transformers
+sklearn
+scipy
+transformers[torch]

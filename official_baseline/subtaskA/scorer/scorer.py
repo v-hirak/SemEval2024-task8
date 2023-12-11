@@ -27,8 +27,11 @@ def evaluate(pred_fpath, gold_fpath):
     }
   """
 
-  pred_labels = pd.read_json(pred_fpath, lines=True)[['id', 'label']]
-  gold_labels = pd.read_json(gold_fpath, lines=True)[['id', 'label']]
+  pred_dataframe = pd.read_json(pred_fpath, lines=True)
+  gold_dataframe = pd.read_json(gold_fpath, lines=True)
+
+  print(pred_labels)
+  print(gold_labels)
 
   merged_df = pred_labels.merge(gold_labels, on='id', suffixes=('_pred', '_gold'))
 
@@ -60,5 +63,5 @@ if __name__ == '__main__':
     logging.info('Prediction file format is correct')
     macro_f1, micro_f1, accuracy, conf_matrix = evaluate(pred_file_path, gold_file_path)
     logging.info("macro-F1={:.5f}\tmicro-F1={:.5f}\taccuracy={:.5f}".format(macro_f1, micro_f1, accuracy))
-    ConfusionMatrixDisplay(conf_matrix).plot()
+    ConfusionMatrixDisplay(conf_matrix, display_labels=["human", "machine"]).plot()
     plt.show()
