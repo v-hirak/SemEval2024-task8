@@ -4,7 +4,7 @@ from sklearn.metrics import f1_score, accuracy_score
 import pandas as pd
 import sys
 sys.path.append('.')
-from subtaskA.format_checker.format_checker import check_format
+from official_baseline.subtaskA.format_checker.format_checker import check_format
 
 """
 Scoring of SEMEVAL-Task-8--subtask-A-and-B  with the metrics f1-macro, f1-micro and accuracy. 
@@ -25,17 +25,24 @@ def evaluate(pred_fpath, gold_fpath):
       labels -> labels (0 or 1 for subtask A and from 0 to 5 for subtask B),
     }
   """
-  
+
   pred_labels = pd.read_json(pred_fpath, lines=True)[['id', 'label']]
-  gold_labels = pd.read_json(gold_fpath, lines=True)[['id', 'label']]
+  gold_labels = pd.read_json(gold_fpath, lines=True)[['id', 'label', 'source']]
 
   merged_df = pred_labels.merge(gold_labels, on='id', suffixes=('_pred', '_gold'))
 
   macro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="macro", zero_division=0)
   micro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="micro", zero_division=0)
   accuracy = accuracy_score(merged_df['label_gold'], merged_df['label_pred'])
+
+  source_accuracies = {}
+  unique_sources = merged_df['source'].unique()
+  for source in unique_sources:
+    source_df = merged_df[merged_df['source'] == source]
+    source_accuracy = accuracy_score(source_df['label_gold'], source_df['label_pred'])
+    source_accuracies[source] = source_accuracy
   
-  return macro_f1, micro_f1, accuracy
+  return macro_f1, micro_f1, accuracy, source_accuracies
 
 
 def validate_files(pred_files):
@@ -56,7 +63,6 @@ if __name__ == '__main__':
 
   if validate_files(pred_file_path):
     logging.info('Prediction file format is correct')
-    macro_f1, micro_f1, accuracy = evaluate(pred_file_path, gold_file_path)
+    macro_f1, micro_f1, accuracy, source_accuracies = evaluate(pred_file_path, gold_file_path)
     logging.info("macro-F1={:.5f}\tmicro-F1={:.5f}\taccuracy={:.5f}".format(macro_f1, micro_f1, accuracy))
-
-
+    print(source_accuracies)

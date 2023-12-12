@@ -1,13 +1,14 @@
 import logging.handlers
 import argparse
-from sklearn.metrics import f1_score, accuracy_score
+import matplotlib.pyplot as plt
+from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 import pandas as pd
 import sys
 sys.path.append('.')
-from subtaskA.format_checker.format_checker import check_format
+from official_baseline.subtaskA.format_checker.format_checker import check_format
 
 """
-Scoring of SEMEVAL-Task-8--subtask-A-and-B  with the metrics f1-macro, f1-micro and accuracy. 
+Scoring of SEMEVAL-Task-8--subtask-A-and-B  with the metrics f1-macro, f1-micro and accuracy.
 """
 
 def evaluate(pred_fpath, gold_fpath):
@@ -15,27 +16,31 @@ def evaluate(pred_fpath, gold_fpath):
     Evaluates the predicted classes w.r.t. a gold file.
     Metrics are: f1-macro, f1-micro and accuracy
 
-    :param pred_fpath: a json file with predictions, 
+    :param pred_fpath: a json file with predictions,
     :param gold_fpath: the original annotated gold file.
 
-    The submission of the result file should be in jsonl format. 
+    The submission of the result file should be in jsonl format.
     It should be a lines of objects:
     {
       id     -> identifier of the test sample,
       labels -> labels (0 or 1 for subtask A and from 0 to 5 for subtask B),
     }
   """
-  
-  pred_labels = pd.read_json(pred_fpath, lines=True)[['id', 'label']]
-  gold_labels = pd.read_json(gold_fpath, lines=True)[['id', 'label']]
+
+  pred_dataframe = pd.read_json(pred_fpath, lines=True)
+  gold_dataframe = pd.read_json(gold_fpath, lines=True)
+
+  print(pred_labels)
+  print(gold_labels)
 
   merged_df = pred_labels.merge(gold_labels, on='id', suffixes=('_pred', '_gold'))
 
-  macro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="macro", zero_division=0)
-  micro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="micro", zero_division=0)
+  macro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="macro", zero_division=1)
+  micro_f1 = f1_score(merged_df['label_gold'], merged_df['label_pred'], average="micro", zero_division=1)
   accuracy = accuracy_score(merged_df['label_gold'], merged_df['label_pred'])
-  
-  return macro_f1, micro_f1, accuracy
+  conf_matrix = confusion_matrix(merged_df['label_gold'], merged_df['label_pred'])
+
+  return macro_f1, micro_f1, accuracy, conf_matrix
 
 
 def validate_files(pred_files):
@@ -56,7 +61,7 @@ if __name__ == '__main__':
 
   if validate_files(pred_file_path):
     logging.info('Prediction file format is correct')
-    macro_f1, micro_f1, accuracy = evaluate(pred_file_path, gold_file_path)
+    macro_f1, micro_f1, accuracy, conf_matrix = evaluate(pred_file_path, gold_file_path)
     logging.info("macro-F1={:.5f}\tmicro-F1={:.5f}\taccuracy={:.5f}".format(macro_f1, micro_f1, accuracy))
-
-
+    ConfusionMatrixDisplay(conf_matrix, display_labels=["human", "machine"]).plot()
+    plt.show()

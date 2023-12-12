@@ -47,7 +47,7 @@ def fine_tune(train_df, valid_df, checkpoints_path, id2label, label2id, model):
     # get tokenizer and model from huggingface
     tokenizer = AutoTokenizer.from_pretrained(model)     # put your model here
     model = AutoModelForSequenceClassification.from_pretrained(
-       model, num_labels=len(label2id), id2label=id2label, label2id=label2id    # put your model here
+       model, num_labels=len(label2id), id2label=id2label, label2id=label2id, ignore_mismatched_sizes=True    # put your model here
     )
 
     # tokenize data for train/valid
@@ -64,7 +64,7 @@ def fine_tune(train_df, valid_df, checkpoints_path, id2label, label2id, model):
         learning_rate=2e-5,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
-        num_train_epochs=3,
+        num_train_epochs=1,
         weight_decay=0.01,
         evaluation_strategy="epoch",
         save_strategy="epoch",
@@ -100,7 +100,11 @@ def test(test_df, model_path, id2label, label2id):
 
     # load best model
     model = AutoModelForSequenceClassification.from_pretrained(
-       model_path, num_labels=len(label2id), id2label=id2label, label2id=label2id
+       model_path,
+       num_labels=len(label2id),
+       id2label=id2label,
+       label2id=label2id,
+       ignore_mismatched_sizes=True
     )
 
     test_dataset = Dataset.from_pandas(test_df)
