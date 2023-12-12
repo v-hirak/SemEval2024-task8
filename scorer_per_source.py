@@ -65,4 +65,4 @@ if __name__ == '__main__':
     logging.info('Prediction file format is correct')
     macro_f1, micro_f1, accuracy, source_accuracies = evaluate(pred_file_path, gold_file_path)
     logging.info("macro-F1={:.5f}\tmicro-F1={:.5f}\taccuracy={:.5f}".format(macro_f1, micro_f1, accuracy))
-    print(source_accuracies)
+    logging.info(f"accuracy per domain: {source_accuracies}")
