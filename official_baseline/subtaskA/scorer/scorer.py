@@ -4,7 +4,7 @@ from sklearn.metrics import f1_score, accuracy_score
 import pandas as pd
 import sys
 sys.path.append('.')
-from subtaskA.format_checker.format_checker import check_format
+from official_baseline.subtaskA.format_checker.format_checker import check_format
 
 """
 Scoring of SEMEVAL-Task-8--subtask-A-and-B  with the metrics f1-macro, f1-micro and accuracy. 
